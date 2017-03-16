@@ -13,6 +13,38 @@ class Timeout(Exception):
     """Subclass base exception for code clarity."""
     pass
 
+def lecture_heuristic(game, player):
+    """
+    Parameters
+    ----------
+    game : `isolation.Board`
+        An instance of `isolation.Board` encoding the current state of the
+        game (e.g., player locations and blocked cells).
+
+    player : object
+        A player instance in the current game (i.e., an object corresponding to
+        one of the player objects `game.__player_1__` or `game.__player_2__`.)
+
+    Returns
+    -------
+    float
+        The heuristic value of the current game state to the specified player.
+    """
+    # First check if the game is done yet
+    if game.is_winner(player):
+        return float("inf")
+    if game.is_loser(player):
+        return float("-inf")
+
+    player_moves = len(game.get_legal_moves(player))
+    opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+
+    heuristic_value = float(player_moves - 2 * opponent_moves)
+
+    return heuristic_value
+
+# ============== CUSTOM HEURISTIC FUNCTIONS BELOW ============== #
+# ===  heuristic_fun_1, heuristic_fun_2 and heuristic_fun_3  === #
 
 def heuristic_fun_1(game, player):
     """
@@ -40,9 +72,10 @@ def heuristic_fun_1(game, player):
     player_moves = len(game.get_legal_moves(player))
     opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
 
-    # Reward when computer player has more moves than the opponent.
-    # When the opponent has more legal moves, it penalizes with a weight of 2
-    heuristic_value = float(player_moves - 2 * opponent_moves)
+    # When the opponent has more legal moves, it penalizes with a weight of 4.
+    # This is similar to the heuristic given in lecture, but it looks at the effect of
+    # increasing the weighting factor from 2 to 4.
+    heuristic_value = float(player_moves - 4 * opponent_moves)
 
     return heuristic_value
 
@@ -72,11 +105,15 @@ def heuristic_fun_2(game, player):
 
     player_moves = len(game.get_legal_moves(player))
     opponent_moves = len(game.get_legal_moves(game.get_opponent(player)))
+    
+    # Avoid the risk of dividing a zero later on
+    if player_moves == 0:
+        return float("-inf")
+    if opponent_moves == 0:
+        return float("inf")
 
-    # Reward when computer player has more moves than the opponent.
-    # When the opponent has more legal moves, it penalizes with a weight of 4.
-    # This is similar to heuristic_fun_1, but the effect of increasing the weighting value is investigated here.
-    heuristic_value = float(player_moves - 4 * opponent_moves)
+    # The heuristic value is the computer player's legal moves scaled by the inverse of the opponent's moves
+    heuristic_value = float(player_moves/opponent_moves)
 
     return heuristic_value
 
@@ -113,8 +150,9 @@ def heuristic_fun_3(game, player):
     if opponent_moves == 0:
         return float("inf")
 
-    # The heuristic value is the computer player's legal moves scaled by the inverse of the opponent's moves
-    heuristic_value = float(player_moves/opponent_moves)
+    # This heuristic is similar to heuristic_fun_2 but it looks at
+    # what happens when opponent_moves is weighted by a factor of 2.
+    heuristic_value = float(player_moves/(2 * opponent_moves))
 
     return heuristic_value
 
